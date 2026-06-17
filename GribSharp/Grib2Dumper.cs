@@ -43,6 +43,8 @@ namespace GribSharp
             double avg = n > 0 ? sum / n : 0;
 
             sb.AppendLine($"  -- Field {index} --");
+            sb.AppendLine($"    discipline={f.DisciplineName} ({f.Discipline}) category={f.ParameterCategoryName} ({f.ParameterCategory})");
+            sb.AppendLine($"    pdt={f.ProductDefinitionTemplateName} ({f.ProductDefinitionTemplate})");
             sb.AppendLine($"    param={f.ParameterName} [{f.Units}] (disc{f.Discipline}/cat{f.ParameterCategory}/num{f.ParameterNumber})");
             sb.AppendLine($"    level={f.LevelDescription} value={f.LevelValue} type={f.LevelType}");
             sb.AppendLine($"    refTime={f.ReferenceTime:yyyy-MM-dd HH:mm}Z forecast={f.ForecastTime}");

@@ -19,6 +19,8 @@ The library implements the core GRIB2 data representation templates and decoding
 * Reading of GRIB2 messages, sections, and metadata.
 * Rich api for easy extraction.
 * Direct api (more complex).
+* Supports reading of GRIB2 files with missing values.
+* Full support for GRIB2 files from NOAA NOMADS.
 
 * Support for the following Data Representation Templates:
 

@@ -2,8 +2,6 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9.0</LangVersion>
-    <RootNamespace>GribParser</RootNamespace>
-    <AssemblyName>GribParser</AssemblyName>
     <Nullable>disable</Nullable>
 
     <PackageId>GribSharp</PackageId>

@@ -5,7 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- Full support for GRIB2 files from NOAA NOMADS
 
+### Changed
+- `Grib2Dumper` output now includes discipline name, category name and product definition template.
+
+### Fixed
+- `GetValueAt` not interpolating correctly for coordinates between grid points
+
+## [1.0.11] - 2025-06-17
 ### Added
 - Stream-based parsing: `Grib2Reader` and `Grib2Parser` now accept `Stream` directly, supporting `FileStream` and `MemoryStream` without copying the entire buffer into memory.
 
