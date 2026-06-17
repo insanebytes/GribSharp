@@ -1,42 +1,71 @@
 using System;
+using System.IO;
 
 namespace GribSharp.IO
 {
-    /// <summary>Lectura big-endian sobre un buffer GRIB2.</summary>
+    /// <summary>Lectura big-endian sobre un stream GRIB2.</summary>
     public sealed class Grib2Reader
     {
-        private readonly byte[] _data;
-        public long Position { get; set; }
-        public long Length => _data.Length;
+        private readonly Stream _stream;
+
+        public long Position
+        {
+            get => _stream.Position;
+            set => _stream.Position = value;
+        }
+
+        public long Length => _stream.Length;
 
         public Grib2Reader(byte[] data, long offset = 0)
         {
-            _data = data ?? throw new ArgumentNullException(nameof(data));
-            Position = offset;
+            _stream = new MemoryStream(data ?? throw new ArgumentNullException(nameof(data)), false);
+            if (offset != 0)
+                _stream.Position = offset;
         }
 
-        public byte ReadUInt8() => _data[Position++];
+        public Grib2Reader(Stream stream, long offset = 0)
+        {
+            _stream = stream ?? throw new ArgumentNullException(nameof(stream));
+            if (!stream.CanRead)
+                throw new ArgumentException("Stream must be readable.", nameof(stream));
+            if (!stream.CanSeek)
+                throw new ArgumentException("Stream must be seekable.", nameof(stream));
+            if (offset != 0)
+                _stream.Position = offset;
+        }
+
+        public byte ReadUInt8()
+        {
+            int b = _stream.ReadByte();
+            if (b < 0) throw new EndOfStreamException();
+            return (byte)b;
+        }
 
         public ushort ReadUInt16()
         {
-            int v = (_data[Position] << 8) | _data[Position + 1];
-            Position += 2;
-            return (ushort)v;
+            int b0 = _stream.ReadByte();
+            int b1 = _stream.ReadByte();
+            if (b1 < 0) throw new EndOfStreamException();
+            return (ushort)((b0 << 8) | b1);
         }
 
         public uint ReadUInt24()
         {
-            uint v = (uint)((_data[Position] << 16) | (_data[Position + 1] << 8) | _data[Position + 2]);
-            Position += 3;
-            return v;
+            int b0 = _stream.ReadByte();
+            int b1 = _stream.ReadByte();
+            int b2 = _stream.ReadByte();
+            if (b2 < 0) throw new EndOfStreamException();
+            return (uint)((b0 << 16) | (b1 << 8) | b2);
         }
 
         public uint ReadUInt32()
         {
-            uint v = (uint)((_data[Position] << 24) | (_data[Position + 1] << 16) |
-                            (_data[Position + 2] << 8) | _data[Position + 3]);
-            Position += 4;
-            return v;
+            int b0 = _stream.ReadByte();
+            int b1 = _stream.ReadByte();
+            int b2 = _stream.ReadByte();
+            int b3 = _stream.ReadByte();
+            if (b3 < 0) throw new EndOfStreamException();
+            return (uint)((b0 << 24) | (b1 << 16) | (b2 << 8) | b3);
         }
 
         public ulong ReadUInt64()
@@ -65,29 +94,52 @@ namespace GribSharp.IO
         public float ReadFloat32()
         {
             var bytes = new byte[4];
-            bytes[0] = _data[Position + 3];
-            bytes[1] = _data[Position + 2];
-            bytes[2] = _data[Position + 1];
-            bytes[3] = _data[Position];
-            Position += 4;
+            ReadExact(bytes, 0, 4);
+            byte tmp;
+            tmp = bytes[0]; bytes[0] = bytes[3]; bytes[3] = tmp;
+            tmp = bytes[1]; bytes[1] = bytes[2]; bytes[2] = tmp;
             return BitConverter.ToSingle(bytes, 0);
         }
 
         public byte[] ReadBytes(int n)
         {
-            var outBuf = new byte[n];
-            Array.Copy(_data, Position, outBuf, 0, n);
-            Position += n;
-            return outBuf;
+            var buf = new byte[n];
+            ReadExact(buf, 0, n);
+            return buf;
         }
 
         public string ReadAscii(int n)
         {
-            var s = System.Text.Encoding.ASCII.GetString(_data, (int)Position, n);
-            Position += n;
-            return s;
+            var buf = ReadBytes(n);
+            return System.Text.Encoding.ASCII.GetString(buf, 0, n);
         }
 
-        public void Skip(int n) => Position += n;
+        public void Skip(int n) => _stream.Position += n;
+
+        /// <summary>Lee bytes en la posición actual sin avanzar. Retorna cantidad efectivamente leída.</summary>
+        public int PeekBytes(byte[] buffer, int offset, int count)
+        {
+            long saved = _stream.Position;
+            int totalRead = 0;
+            while (totalRead < count)
+            {
+                int read = _stream.Read(buffer, offset + totalRead, count - totalRead);
+                if (read == 0) break;
+                totalRead += read;
+            }
+            _stream.Position = saved;
+            return totalRead;
+        }
+
+        private void ReadExact(byte[] buffer, int offset, int count)
+        {
+            int totalRead = 0;
+            while (totalRead < count)
+            {
+                int read = _stream.Read(buffer, offset + totalRead, count - totalRead);
+                if (read == 0) throw new EndOfStreamException();
+                totalRead += read;
+            }
+        }
     }
 }
