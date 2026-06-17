@@ -11,13 +11,10 @@ namespace GribSharp
 {
     public static class Grib2Parser
     {
-        public static List<Grib2Message> Parse(Stream stream)
+        public static Grib2File ParseFile(string path)
         {
-            using (var ms = new MemoryStream())
-            {
-                stream.CopyTo(ms);
-                return Parse(ms.ToArray());
-            }
+            using var stream = File.OpenRead(path);
+            return new Grib2File(Parse(stream));
         }
 
         public static Grib2File ParseFile(Stream stream)
@@ -30,16 +27,35 @@ namespace GribSharp
             return new Grib2File(Parse(data));
         }
 
+        public static List<Grib2Message> Parse(string path)
+        {
+            using var stream = File.OpenRead(path);
+            return Parse(stream);
+        }
+
+        public static List<Grib2Message> Parse(Stream stream)
+        {
+            var r = new Grib2Reader(stream);
+            return ParseCore(r);
+        }
+
         public static List<Grib2Message> Parse(byte[] data)
         {
-            var messages = new List<Grib2Message>();
             var r = new Grib2Reader(data);
+            return ParseCore(r);
+        }
+
+        private static List<Grib2Message> ParseCore(Grib2Reader r)
+        {
+            var messages = new List<Grib2Message>();
+            var peek = new byte[4];
 
             while (r.Position < r.Length - 4)
             {
-                // Buscar "GRIB".
-                if (!(data[r.Position] == 'G' && data[r.Position + 1] == 'R' &&
-                      data[r.Position + 2] == 'I' && data[r.Position + 3] == 'B'))
+                if (r.PeekBytes(peek, 0, 4) < 4)
+                    break;
+
+                if (!(peek[0] == 'G' && peek[1] == 'R' && peek[2] == 'I' && peek[3] == 'B'))
                 {
                     r.Position++;
                     continue;
@@ -62,9 +78,8 @@ namespace GribSharp
 
                 while (r.Position < messageStart + ind.TotalLength)
                 {
-                    // ¿Fin "7777"?
-                    if (data[r.Position] == '7' && data[r.Position + 1] == '7' &&
-                        data[r.Position + 2] == '7' && data[r.Position + 3] == '7')
+                    if (r.PeekBytes(peek, 0, 4) >= 4 &&
+                        peek[0] == '7' && peek[1] == '7' && peek[2] == '7' && peek[3] == '7')
                     {
                         r.Position += 4;
                         break;
@@ -79,7 +94,7 @@ namespace GribSharp
                             message.CenterId = ids.CenterId;
                             break;
                         case 2:
-                            r.Position = secStart + hdr.Length; // local, ignorar
+                            r.Position = secStart + hdr.Length;
                             break;
                         case 3:
                             gds = GridDefinitionSection.Read(r, secStart, hdr.Length);

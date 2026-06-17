@@ -10,6 +10,8 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     environment: release
+    env:
+      VERSION: 1.0.${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET
@@ -19,11 +21,13 @@ jobs:
       - name: Restore
         run: dotnet restore GribSharp.slnx
       - name: Build
-        run: dotnet build GribSharp.slnx -c Release --no-restore
+        run: dotnet build GribSharp.slnx -c Release --no-restore -p:Version=${{ env.VERSION }}
       - name: Test
         run: dotnet test GribSharp.slnx -c Release --no-build
+      - name: Extract release notes
+        run: awk '/^## \[Unreleased\]/{f=1;next} /^## \[/{f=0} f' CHANGELOG.md > RELEASE_NOTES.txt
       - name: Pack
-        run: dotnet pack GribSharp/GribSharp.csproj -c Release --no-build -o ./nupkg
+        run: dotnet pack GribSharp/GribSharp.csproj -c Release --no-build -o ./nupkg -p:Version=${{ env.VERSION }}
       - name: NuGet login (OIDC → temp API key)
         uses: NuGet/login@v1
         id: login
