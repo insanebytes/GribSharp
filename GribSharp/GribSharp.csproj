@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <RootNamespace>GribParser</RootNamespace>
+    <AssemblyName>GribParser</AssemblyName>
+    <Nullable>disable</Nullable>
+
+    <PackageId>GribSharp</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>InsaneBytes</Authors>
+    <Description>Pure C# GRIB2 decoder for .NET with support for Simple Packing, Complex Packing, IEEE Float, JPEG2000 (CSJ2K), and bitmap-based missing values.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/insanebytes/GribSharp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/insanebytes/GribSharp</RepositoryUrl>
+    <PackageTags>grib;grib2;weather;meteorology</PackageTags>
+    <Title>GribSharp</Title>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CSJ2K" Version="3.0.0" />
+  </ItemGroup>
+</Project>

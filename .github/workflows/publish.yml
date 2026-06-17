@@ -1,0 +1,33 @@
+name: Publish to NuGet
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    permissions:
+      id-token: write
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore
+        run: dotnet restore GribSharp.slnx
+      - name: Build
+        run: dotnet build GribSharp.slnx -c Release --no-restore
+      - name: Test
+        run: dotnet test GribSharp.slnx -c Release --no-build
+      - name: Pack
+        run: dotnet pack GribSharp/GribSharp.csproj -c Release --no-build -o ./nupkg
+      - name: NuGet login (OIDC → temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+      - name: Push to NuGet
+        run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
