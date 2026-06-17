@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="Example/Example.csproj" />
   <Project Path="GribSharp.Tests/GribSharp.Tests.csproj" />
   <Project Path="GribSharp/GribSharp.csproj" />
 </Solution>

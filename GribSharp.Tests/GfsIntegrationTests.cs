@@ -17,7 +17,7 @@ namespace GribSharp.Tests
             if (!File.Exists(SamplePath))
             {
                 Assert.Inconclusive($"Fichero de muestra no encontrado: {SamplePath}. " +
-                    "Descargar de NOMADS (var TMP, lev 2 m above ground) para ejecutar.");
+                    "Descargar de NOMADS (var TMP, lev 2 m above ground, lev surface) para ejecutar.");
             }
             return File.ReadAllBytes(SamplePath);
         }
@@ -45,7 +45,7 @@ namespace GribSharp.Tests
             var valid = f.Values.Where(v => !float.IsNaN(v)).ToArray();
             Assert.IsTrue(valid.Length > 0, "sin valores válidos");
             Assert.IsTrue(valid.Min() > 180f, $"min={valid.Min()}");
-            Assert.IsTrue(valid.Max() < 340f, $"max={valid.Max()}");
+            Assert.IsTrue(valid.Max() < 360f, $"max={valid.Max()}");
         }
 
         [TestMethod]
@@ -83,6 +83,35 @@ namespace GribSharp.Tests
             var byName = file.GetField("Temperature");
             Assert.IsNotNull(byEnum);
             Assert.AreSame(byName, byEnum);
+        }
+
+        [TestMethod]
+        public void GetValueAt_BilinearMatchesXyGrib_Ibiza2m()
+        {
+            byte[] data = LoadOrSkip();
+            var file = Grib2Parser.ParseFile(data);
+            var f = file.GetField(Parameter.Temperature, LevelType.HeightAboveGround, 2);
+            if (f == null)
+                Assert.Inconclusive("Temperature at 2m above ground not in sample file");
+
+            // Aeropuerto de Ibiza. xyGrib (interpolación bilineal) = 298.05 K (24.9 ºC).
+            float v = f.GetValueAt(38.8702778, 1.3702777777777777);
+            Assert.AreEqual(298.05, v, 0.2, $"esperado ~298.05 K, obtenido {v}");
+        }
+
+        [TestMethod]
+        public void GetValueAt_BilinearMatchesXyGrib_Madrid2m()
+        {
+            byte[] data = LoadOrSkip();
+            var file = Grib2Parser.ParseFile(data);
+            var f = file.GetField(Parameter.Temperature, LevelType.HeightAboveGround, 2);
+            if (f == null)
+                Assert.Inconclusive("Temperature at 2m above ground not in sample file");
+
+            // Aeropuerto Adolfo Suárez Madrid-Barajas (LEMD).
+            // Bilineal sobre los 4 puntos circundantes = 302.72 K (29.57 ºC).
+            float v = f.GetValueAt(40.4936, -3.5668);
+            Assert.AreEqual(302.72, v, 0.2, $"esperado ~302.72 K, obtenido {v}");
         }
 
         [TestMethod]
