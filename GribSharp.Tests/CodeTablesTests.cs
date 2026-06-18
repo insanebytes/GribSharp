@@ -26,7 +26,7 @@ namespace GribSharp.Tests
         public void ResolvesLevelAndCenter()
         {
             Assert.AreEqual("Isobaric surface", CodeTables.LevelDescription(100));
-            Assert.AreEqual("US NCEP", CodeTables.Center(7));
+            Assert.AreEqual("US National Weather Service - NCEP", CodeTables.Center(7));
         }
     }
 }
