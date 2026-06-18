@@ -114,6 +114,10 @@ namespace GribSharp.IO
             return System.Text.Encoding.ASCII.GetString(buf, 0, n);
         }
 
+        /// <summary>
+        /// Skips n octets or bytes
+        /// </summary>
+        /// <param name="n"></param>
         public void Skip(int n) => _stream.Position += n;
 
         /// <summary>Lee bytes en la posición actual sin avanzar. Retorna cantidad efectivamente leída.</summary>

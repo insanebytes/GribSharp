@@ -8,15 +8,17 @@ namespace GribSharp.Sections
     {
         public int CenterId;
         public DateTime ReferenceTime;
+        public int ReferenceTimeSignificance;
 
         public static IdentificationSection Read(Grib2Reader r, long sectionStart, uint length)
         {
             // Tras SectionHeader.Read, r está en octeto 6 (offset 5).
             var s = new IdentificationSection { CenterId = r.ReadUInt16() };
-            r.Skip(2);              // sub-centro
-            r.Skip(1);              // tabla maestra
-            r.Skip(1);              // tabla local
-            r.Skip(1);              // significancia tiempo ref
+            r.Skip(2); // sub-centro
+            r.Skip(1); // tabla maestra
+            r.Skip(1); // tabla local
+            // r.Skip(1);              // significancia tiempo ref
+            s.ReferenceTimeSignificance = r.ReadUInt8();
             int year = r.ReadUInt16();
             int month = r.ReadUInt8();
             int day = r.ReadUInt8();

@@ -66,6 +66,7 @@ namespace GribSharp
                 var message = new Grib2Message
                 {
                     Discipline = ind.Discipline,
+                    DisciplineName = CodeTables.DisciplineDescription(ind.Discipline),
                     Edition = ind.Edition,
                     Length = ind.TotalLength
                 };
@@ -92,6 +93,7 @@ namespace GribSharp
                         case 1:
                             ids = IdentificationSection.Read(r, secStart, hdr.Length);
                             message.CenterId = ids.CenterId;
+                            message.CenterName = CodeTables.Center(ids.CenterId);
                             break;
                         case 2:
                             r.Position = secStart + hdr.Length;
@@ -156,6 +158,10 @@ namespace GribSharp
                 KnownLevelType = CodeTables.ToLevelType(pds.LevelType),
                 ReferenceTime = ids?.ReferenceTime ?? default,
                 ForecastTime = pds.ForecastTime,
+                RepresentedTime = ids?.ReferenceTime.AddHours(pds.ForecastTime) ?? default,
+                ReferenceTimeSignificance = ids?.ReferenceTimeSignificance ?? default,
+                ReferenceTimeSignificanceName = CodeTables.ReferenceTimeSignificanceDescription(ids?.ReferenceTimeSignificance ?? default),
+                KnownReferenceTimeSignificance = CodeTables.ToReferenceTimeSignificance(ids?.ReferenceTimeSignificance ?? default), 
                 Grid = gds.Grid,
                 Values = values
             };

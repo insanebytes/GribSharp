@@ -17,7 +17,7 @@ namespace GribSharp
             foreach (var m in messages)
             {
                 sb.AppendLine($"== Message {mi} ==");
-                sb.AppendLine($"  discipline={m.Discipline} edition={m.Edition} length={m.Length} center={CodeTables.Center(m.CenterId)}");
+                sb.AppendLine($"  discipline={m.Discipline} disciplineName={m.DisciplineName} edition={m.Edition} length={m.Length} center={m.CenterName}");
                 int fi = 1;
                 foreach (var f in m.Fields)
                 {
@@ -43,11 +43,12 @@ namespace GribSharp
             double avg = n > 0 ? sum / n : 0;
 
             sb.AppendLine($"  -- Field {index} --");
+            sb.AppendLine($"    referenceTimeSig={f.ReferenceTimeSignificance} referenceTimeSigName={f.ReferenceTimeSignificanceName}");
             sb.AppendLine($"    discipline={f.DisciplineName} ({f.Discipline}) category={f.ParameterCategoryName} ({f.ParameterCategory})");
             sb.AppendLine($"    pdt={f.ProductDefinitionTemplateName} ({f.ProductDefinitionTemplate})");
             sb.AppendLine($"    param={f.ParameterName} [{f.Units}] (disc{f.Discipline}/cat{f.ParameterCategory}/num{f.ParameterNumber})");
             sb.AppendLine($"    level={f.LevelDescription} value={f.LevelValue} type={f.LevelType}");
-            sb.AppendLine($"    refTime={f.ReferenceTime:yyyy-MM-dd HH:mm}Z forecast={f.ForecastTime}");
+            sb.AppendLine($"    reprTime={f.RepresentedTime:yyyy-MM-dd HH:mm}Z refTime={f.ReferenceTime:yyyy-MM-dd HH:mm}Z forecast={f.ForecastTime}");
             sb.AppendLine($"    grid Ni={f.Grid.Ni} Nj={f.Grid.Nj} lat[{f.Grid.Lat1}..{f.Grid.Lat2}] lon[{f.Grid.Lon1}..{f.Grid.Lon2}] di={f.Grid.Di} dj={f.Grid.Dj} scan={f.Grid.ScanMode}");
             sb.AppendLine($"    values n={f.Values.Length} min={min} max={max} avg={avg:F4} nan={nan}");
         }
