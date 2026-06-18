@@ -6,9 +6,11 @@ namespace GribSharp.Model
     public sealed class Grib2Message
     {
         public int Discipline;
+        public string DisciplineName;
         public int Edition;
         public long Length;
         public int CenterId;
+        public string CenterName;
         public List<Grib2Field> Fields = new List<Grib2Field>();
 
         public IReadOnlyList<string> FieldNames

@@ -3,9 +3,10 @@
 var file = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "TestData", "gfs_sample.grib2");
 var parsed = GribSharp.Grib2Parser.ParseFile(file);
 
+
 foreach (var message in parsed.Messages)
 {
-    var field = message.GetField(Parameter.Temperature);
+    var field = message.Fields.FirstOrDefault();
     string level = field.KnownLevelType?.ToString() ?? field.LevelDescription;
     var levelDistance = field.LevelValue;
     string units = field.Units;

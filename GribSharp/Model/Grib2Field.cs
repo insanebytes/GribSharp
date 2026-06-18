@@ -25,7 +25,11 @@ namespace GribSharp.Model
         public Parameter? KnownParameter;
         public LevelType? KnownLevelType;
 
+        public int ReferenceTimeSignificance;
+        public string ReferenceTimeSignificanceName;
+        public ReferenceTimeSignificance? KnownReferenceTimeSignificance;
         public DateTime ReferenceTime;
+        public DateTime RepresentedTime;
         public int ForecastTime;
 
         public Grid Grid;
