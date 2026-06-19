@@ -16,5 +16,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GribSharp\GribSharp.csproj" />
+    <ProjectReference Include="..\GribSharp.Jpeg2000\GribSharp.Jpeg2000.csproj" />
   </ItemGroup>
 </Project>

@@ -27,7 +27,10 @@ jobs:
       - name: Extract release notes
         run: awk '/^## \[Unreleased\]/{f=1;next} /^## \[/{f=0} f' CHANGELOG.md > RELEASE_NOTES.txt
       - name: Pack
-        run: dotnet pack GribSharp/GribSharp.csproj -c Release --no-build -o ./nupkg -p:Version=${{ env.VERSION }}
+        run: |
+          dotnet pack GribSharp/GribSharp.csproj -c Release --no-build -o ./nupkg -p:Version=${{ env.VERSION }}
+          dotnet pack GribSharp.Jpeg2000/GribSharp.Jpeg2000.csproj -c Release --no-build -o ./nupkg -p:Version=${{ env.VERSION }}
+          dotnet pack Build/GribSharp.meta.csproj -c Release --no-build -o ./nupkg -p:Version=${{ env.VERSION }}
       - name: NuGet login (OIDC → temp API key)
         uses: NuGet/login@v1
         id: login

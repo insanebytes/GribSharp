@@ -14,7 +14,7 @@ The library implements the core GRIB2 data representation templates and decoding
 
 ## Features
 
-* Pure C# implementation only one dependency (CSJ2K for JPEG2000), compatible with Unity.
+* Pure C# implementation. The core package has **zero external dependencies**; JPEG2000 support is an opt-in add-on (CSJ2K). Compatible with Unity.
 * Compatible with modern .NET runtimes.
 * Reading of GRIB2 messages, sections, and metadata.
 * Rich api for easy extraction.
@@ -38,7 +38,7 @@ The library implements the core GRIB2 data representation templates and decoding
     * Variable bit widths.
     * Group-based decoding.
     * First- and second-order spatial differencing reconstruction.
-  * **JPEG2000**
+  * **JPEG2000** (optional `GribSharp.Jpeg2000` add-on)
 
     * JPEG2000 codestream extraction.
     * Decoding through CSJ2K.
@@ -51,20 +51,40 @@ The library implements the core GRIB2 data representation templates and decoding
 * Dump Grib2 file to text
 
 
-## Dependencies
+## Packages
 
-GribSharp is implemented entirely in managed C# and has a single external dependency:
+GribSharp ships as three NuGet packages so you only pull in the JPEG2000
+dependency when you need it:
 
-* **CSJ2K** — used exclusively for decoding JPEG2000-compressed GRIB2 fields.
+| Package | Dependencies | Use it when |
+| --- | --- | --- |
+| **GribSharp.Core** | none | You don't need JPEG2000-packed data (template 5.40). Smallest footprint, no CSJ2K. |
+| **GribSharp.Jpeg2000** | GribSharp.Core + CSJ2K | Add-on that enables JPEG2000 decoding. Reference it alongside Core. |
+| **GribSharp** | GribSharp.Core + GribSharp.Jpeg2000 | Meta-package with everything. Drop-in for previous GribSharp users. |
+
+JPEG2000 activation is automatic: when the `GribSharp.Jpeg2000` assembly is
+present, the core probes and registers its decoder on first use. For trimming/AOT
+scenarios where reflection is unreliable, call `GribSharp.Jpeg2000.Jpeg2000Support.Register()`
+once at startup. Without the add-on, template 5.40 throws `GribNotSupportedException`.
+
+* **CSJ2K** — used exclusively by the add-on for decoding JPEG2000-compressed GRIB2 fields.
 
 ## Goals
 
 GribSharp aims to provide a lightweight, cross-platform, and easy-to-integrate GRIB2 decoding library for .NET applications without relying on native GRIB tooling.
 
 ## Install
-This package is available in Nuget
+These packages are available on NuGet.
 ```
+# Everything (drop-in, includes JPEG2000)
 dotnet add package GribSharp
+
+# Core only, no CSJ2K dependency
+dotnet add package GribSharp.Core
+
+# Core + JPEG2000 add-on
+dotnet add package GribSharp.Core
+dotnet add package GribSharp.Jpeg2000
 ```
 
 ## Usage
