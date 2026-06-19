@@ -4,15 +4,15 @@
     <LangVersion>9.0</LangVersion>
     <Nullable>disable</Nullable>
 
-    <PackageId>GribSharp.Core</PackageId>
+    <PackageId>GribSharp.Jpeg2000</PackageId>
     <Version>1.0.0</Version>
     <Authors>InsaneBytes</Authors>
-    <Description>Pure C# GRIB2 decoder for .NET with support for Simple Packing, Complex Packing, IEEE Float, and bitmap-based missing values. JPEG2000 (template 5.40) is provided by the optional GribSharp.Jpeg2000 add-on package.</Description>
+    <Description>JPEG2000 (GRIB2 template 5.40) decoding add-on for GribSharp, backed by CSJ2K. Reference this package alongside GribSharp.Core to enable JPEG2000-packed data.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/insanebytes/GribSharp</PackageProjectUrl>
     <RepositoryUrl>https://github.com/insanebytes/GribSharp</RepositoryUrl>
-    <PackageTags>grib;grib2;weather;meteorology</PackageTags>
-    <Title>GribSharp</Title>
+    <PackageTags>grib;grib2;weather;meteorology;jpeg2000</PackageTags>
+    <Title>GribSharp.Jpeg2000</Title>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
@@ -24,9 +24,9 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-    <None Include="..\CHANGELOG.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GribSharp\GribSharp.csproj" />
+    <PackageReference Include="CSJ2K" Version="3.0.0" />
   </ItemGroup>
 </Project>

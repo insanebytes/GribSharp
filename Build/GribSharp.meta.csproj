@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+
+    <!-- Metapaquete: sin código ni assembly propio, solo dependencias NuGet. -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeSymbols>false</IncludeSymbols>
+    <SuppressDependenciesWhenPacking>false</SuppressDependenciesWhenPacking>
+    <!-- Metapaquete sin lib/: NU5128 (sin ensamblado para el TFM) es esperado. -->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+
+    <PackageId>GribSharp</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>InsaneBytes</Authors>
+    <Description>Meta-package that pulls in GribSharp.Core and the GribSharp.Jpeg2000 add-on, providing full GRIB2 decoding including JPEG2000. Drop-in for previous GribSharp users. Use GribSharp.Core alone to avoid the CSJ2K dependency.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/insanebytes/GribSharp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/insanebytes/GribSharp</RepositoryUrl>
+    <PackageTags>grib;grib2;weather;meteorology;jpeg2000</PackageTags>
+    <Title>GribSharp</Title>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition="Exists('$(MSBuildProjectDirectory)/../RELEASE_NOTES.txt')">
+    <PackageReleaseNotes>$([System.IO.File]::ReadAllText('$(MSBuildProjectDirectory)/../RELEASE_NOTES.txt'))</PackageReleaseNotes>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+  <!-- ProjectReference => dependencias NuGet a Core y al add-on con la misma Version. -->
+  <ItemGroup>
+    <ProjectReference Include="..\GribSharp\GribSharp.csproj" />
+    <ProjectReference Include="..\GribSharp.Jpeg2000\GribSharp.Jpeg2000.csproj" />
+  </ItemGroup>
+</Project>

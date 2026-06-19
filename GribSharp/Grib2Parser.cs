@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using GribSharp.DataRepresentation;
@@ -175,9 +176,35 @@ namespace GribSharp
                 case 2:
                 case 3: return new ComplexPackingDecoder();
                 case 4: return new IeeeFloatDecoder();
-                case 40: return new Jpeg2000Decoder();
-                default: throw new GribNotSupportedException(5, template);
             }
+
+            // Plantillas no incluidas en el núcleo (p. ej. 40/JPEG2000): se resuelven
+            // mediante un decodificador registrado o sondeando un paquete add-on.
+            if (DataRepresentationDecoderRegistry.TryCreate(template, out var decoder))
+                return decoder;
+
+            if (TryProbeAddOn(template, out decoder))
+                return decoder;
+
+            throw new GribNotSupportedException(5, template);
+        }
+
+        // Sonda por reflexión de los paquetes add-on conocidos. Mantiene el núcleo
+        // libre de la dependencia (CSJ2K) y activa el soporte solo si el add-on
+        // está presente. El resultado se cachea en el registro.
+        private static bool TryProbeAddOn(int template, out IDataRepresentationDecoder decoder)
+        {
+            decoder = null;
+            if (template != 40) return false;
+
+            var type = Type.GetType(
+                "GribSharp.DataRepresentation.Jpeg2000Decoder, GribSharp.Jpeg2000",
+                throwOnError: false);
+            if (type == null) return false;
+
+            DataRepresentationDecoderRegistry.Register(
+                template, () => (IDataRepresentationDecoder)Activator.CreateInstance(type));
+            return DataRepresentationDecoderRegistry.TryCreate(template, out decoder);
         }
     }
 }

@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - `RepresentedTime` field in Grib2Field to represent the date of the sample. ReferenceTime + ForecastHour.
 - `CenterName` and `DisciplineName` in `Grib2Message`.
 - `ReferenceTimeSignificance`,`ReferenceTimeSignificanceName` and `KnownReferenceTimeSignificance` in `Grib2Field` from Table 1.2
+- **Split into three NuGet packages**: `GribSharp.Core` (no external dependencies), `GribSharp.Jpeg2000` (optional CSJ2K-backed JPEG2000 add-on), and `GribSharp` (meta-package pulling in both, drop-in for previous users).
+- `DataRepresentationDecoderRegistry` to register decoders for data representation templates not built into the core.
+- `GribSharp.Jpeg2000.Jpeg2000Support.Register()` for explicit JPEG2000 registration (trimming/AOT).
 
 ### Fixed
 - CodeTable `Levels` and `LevelType` enum missing Table 4.5 levels.
@@ -18,7 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - `Grib2Dumper` output now includes the new field `RepresentedTime`.
 - `Grib2Dumper` output now includes the new fields `CenterName` and `DisciplineName`.
 - `Grib2Dumper` output now includes the new fields `ReferenceTimeSignificanceName` and `ReferenceTimeSignificance`.
-- 
+- The core package no longer depends on CSJ2K. JPEG2000 (template 5.40) now requires the `GribSharp.Jpeg2000` add-on; it activates automatically via reflection when present, otherwise template 5.40 throws `GribNotSupportedException`.
 ## [1.0.12] - 2025-06-17
 ### Added
 - Full support for GRIB2 files from NOAA NOMADS
