@@ -50,6 +50,8 @@ The library implements the core GRIB2 data representation templates and decoding
 
 * Dump Grib2 file to text
 
+* File integrity validation (`Grib2Validator`), with optional deep decoding.
+
 
 ## Packages
 
@@ -153,3 +155,48 @@ foreach (var msg in messages)
 // Debug: dump wgrib2 style
 Console.WriteLine(Grib2Dumper.Dump(data));
 ```
+
+---
+### Integrity validation:
+
+`Grib2Validator` walks the file structure without throwing: whatever the input,
+it returns a report listing every anomaly it found.
+
+```
+using GribSharp;
+using GribSharp.Validation;
+
+// Quick structural check (does not decode the data)
+var result = Grib2Validator.ValidateFile("gfs_forecast.grib2");
+
+if (!result.IsValid)
+{
+    foreach (var issue in result.Errors)
+        Console.WriteLine($"{issue.Code} @ byte {issue.Offset}: {issue.Message}");
+}
+
+Console.WriteLine(result);  // resumen + todas las incidencias
+
+// One-liner
+if (!Grib2Validator.IsValidFile("gfs_forecast.grib2"))
+    Console.WriteLine("fichero corrupto");
+
+// Deep validation: also decodes every field to catch corrupted packing
+var deep = Grib2Validator.ValidateFile("gfs_forecast.grib2", Grib2ValidationOptions.Deep);
+```
+
+Checks performed:
+
+* **Message framing** — `GRIB` marker, edition 2, declared length vs. bytes
+  available (truncated files), `7777` terminator, bytes before/after messages.
+* **Sections** — length ≥ 5, section fits inside the message, number in 1-7,
+  ascending order, mandatory sections 1 and 7 present.
+* **Consistency** — `Ni × Nj` against the point count declared in section 3,
+  packed values against grid size, bitmap coverage and its number of set bits
+  against the values in section 5, section 7 size against bits per value.
+* **Support** — grid/data-representation templates the library cannot decode.
+
+Every issue carries a `Severity`: `Error` means the file is corrupt or malformed
+(`IsValid` is `false`); `Warning` means the file is well-formed but something is
+worth knowing — padding around messages, or a valid template this library does
+not implement.

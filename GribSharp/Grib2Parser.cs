@@ -168,7 +168,7 @@ namespace GribSharp
             };
         }
 
-        private static IDataRepresentationDecoder SelectDecoder(int template)
+        internal static IDataRepresentationDecoder SelectDecoder(int template)
         {
             switch (template)
             {
