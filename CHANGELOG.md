@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- `Grib2Validator`: file integrity checking that never throws on corrupt input. Reports every anomaly as a `Grib2ValidationIssue` (severity, stable `Grib2ValidationCode`, message index, section number, byte offset) inside a `Grib2ValidationResult`. Checks message framing (`GRIB`/`7777`, edition, declared length vs. available bytes), section headers (length, bounds, number, ordering, mandatory sections), grid/packing consistency (Ni×Nj vs. declared point count, bitmap coverage, set bits vs. packed values, section 7 size vs. bits per value) and, with `Grib2ValidationOptions.Deep`, full decoding of every field.
+
 ### Changed
 - **Split into three NuGet packages**: `GribSharp.Core` (no external dependencies), `GribSharp.Jpeg2000` (optional CSJ2K-backed JPEG2000 add-on), and `GribSharp` (meta-package pulling in both, drop-in for previous users).
 - `DataRepresentationDecoderRegistry` to register decoders for data representation templates not built into the core.

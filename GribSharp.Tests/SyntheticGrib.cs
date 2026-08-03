@@ -15,6 +15,7 @@ namespace GribSharp.Tests
             var sec1 = Section(1, sec1body);
 
             var t3 = new byte[67]; // cuerpo sección 3 desde octeto 6 (índice = octeto - 6)
+            PutU32(t3, 1, (uint)values.Length); // número de puntos (octetos 7-10)
             PutU16(t3, 7, 0);                 // plantilla 3.0 (octetos 13-14)
             PutU32(t3, 25, 2);                // Ni (octetos 31-34)
             PutU32(t3, 29, 2);                // Nj (octetos 35-38)
@@ -55,6 +56,66 @@ namespace GribSharp.Tests
             var sec7 = Section(7, sec7body);
 
             // Sección 0
+            long total = 16 + sec1.Length + sec3.Length + sec4.Length + sec5.Length + sec6.Length + sec7.Length + 4;
+            var sec0 = new byte[16];
+            sec0[0] = (byte)'G'; sec0[1] = (byte)'R'; sec0[2] = (byte)'I'; sec0[3] = (byte)'B';
+            sec0[6] = 0; sec0[7] = 2;
+            for (int i = 0; i < 8; i++) sec0[15 - i] = (byte)((total >> (8 * i)) & 0xFF);
+
+            var end = new byte[] { (byte)'7', (byte)'7', (byte)'7', (byte)'7' };
+
+            return Concat(sec0, sec1, sec3, sec4, sec5, sec6, sec7, end);
+        }
+
+        /// <summary>
+        /// Variante con plantilla 5.4 (IEEE). Su sección 5 ocupa sólo 12 octetos:
+        /// no incluye el bloque común 12-21 del empaquetado simple.
+        /// </summary>
+        public static byte[] BuildIeeeFloat2x2(float[] values)
+        {
+            var sec1body = new byte[16];
+            sec1body[0] = 0; sec1body[1] = 7;
+            sec1body[7] = (byte)(2024 >> 8); sec1body[8] = 2024 & 0xFF;
+            sec1body[9] = 6; sec1body[10] = 17;
+            var sec1 = Section(1, sec1body);
+
+            var t3 = new byte[67];
+            PutU32(t3, 1, (uint)values.Length); // número de puntos (octetos 7-10)
+            PutU16(t3, 7, 0);                   // plantilla 3.0
+            PutU32(t3, 25, 2);                  // Ni
+            PutU32(t3, 29, 2);                  // Nj
+            PutI32(t3, 41, 1_000000);           // La1
+            PutI32(t3, 45, 0);                  // Lo1
+            PutI32(t3, 50, 0);                  // La2
+            PutI32(t3, 54, 1_000000);           // Lo2
+            PutU32(t3, 58, 1_000000);           // Di
+            PutU32(t3, 62, 1_000000);           // Dj
+            var sec3 = Section(3, t3);
+
+            var t4 = new byte[23];
+            PutU16(t4, 0, 0);  // NV
+            PutU16(t4, 2, 0);  // plantilla 4.0
+            t4[12] = 1;        // unidad rango tiempo
+            t4[17] = 1;        // tipo superficie
+            var sec4 = Section(4, t4);
+
+            var t5 = new byte[7]; // cuerpo desde octeto 6: npoints(4) + plantilla(2) + precisión(1)
+            PutU32(t5, 0, (uint)values.Length); // octetos 6-9
+            PutU16(t5, 4, 4);                   // plantilla 5.4 (octetos 10-11)
+            t5[6] = 1;                          // precisión: IEEE de 32 bits (octeto 12)
+            var sec5 = Section(5, t5);
+
+            var sec6 = Section(6, new byte[] { 255 });
+
+            var sec7body = new byte[values.Length * 4];
+            for (int i = 0; i < values.Length; i++)
+            {
+                var be = BitConverter.GetBytes(values[i]);
+                if (BitConverter.IsLittleEndian) Array.Reverse(be);
+                Array.Copy(be, 0, sec7body, i * 4, 4);
+            }
+            var sec7 = Section(7, sec7body);
+
             long total = 16 + sec1.Length + sec3.Length + sec4.Length + sec5.Length + sec6.Length + sec7.Length + 4;
             var sec0 = new byte[16];
             sec0[0] = (byte)'G'; sec0[1] = (byte)'R'; sec0[2] = (byte)'I'; sec0[3] = (byte)'B';
